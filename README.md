@@ -20,17 +20,37 @@ npm install
 
 * Install and configure the [avalanche-cli](https://docs.avax.network/subnets/install-avalanche-cli)
 
+* Configure the subnet
+
+```
+avalanche subnet create red
+```
+
+1. Select an evm-based subnet
+2. Provide chainId: **7**
+3. Provide symbol: **red**
+4. Use the lastest version of evm
+5. Select the low-disk usage mode
+6. Airdrop tokens to the default account
+7. Do not add any precompiles
+
 * Deply the subnet named 'red' to the local environment: 
 
 ```
-avalanche subnet deploy red
+avalanche subnet deploy red --local
 ```
+
+> Remember to copy the private key of the `Funded address` as it will be needed in the following steps.
+
+You should be able to see the following logs: 
+
+![image](./img/avax-subnet-screenshot.png)
 
 You can find a step by step tutorial in the avalanche subnet [docs](https://docs.avax.network/subnets/create-a-local-subnet).
 
 ### 3. Deploy smart contracts
 
-* Add the rpc endpoint of your subnet and the private key of the subnet account that holds the native tokens to the [hardhat](./hardhat.config.ts) config file.
+* Add the rpc endpoint of your subnet and the private key of the subnet account that holds the native tokens to the [hardhat](./hardhat.config.ts) config file. *Don't forget to add the 0x prefix for the key*
 
 Deploy the contract using hardhat deploy plugin: 
 
