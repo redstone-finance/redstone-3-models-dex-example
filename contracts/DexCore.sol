@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@redstone-finance/evm-connector/contracts/data-services/AvalancheDataServiceConsumerBase.sol";
+import "@redstone-finance/evm-connector/contracts/data-services/MainDemoConsumerBase.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract DexCore is AvalancheDataServiceConsumerBase {
+contract DexCore is MainDemoConsumerBase {
 
     ERC20 public usd;
     bytes32 public constant AVAX_SYMBOL = bytes32("AVAX");
@@ -26,19 +26,5 @@ contract DexCore is AvalancheDataServiceConsumerBase {
 
     function getAvaxPrice() public view returns (uint256) {
         return getOracleNumericValueFromTxMsg(AVAX_SYMBOL);
-    }
-    
-    function getAuthorisedSignerIndex(address signerAddress)
-    public
-    view
-    virtual
-    override
-    returns (uint8)
-    {
-        if (signerAddress == 0x0C39486f770B26F5527BBBf942726537986Cd7eb) {
-        return 0;
-        } else {
-        revert SignerNotAuthorised(signerAddress);
-        }
     }
 }

@@ -13,7 +13,7 @@ contract DexClassic {
 
     constructor(ERC20 usdToken) {
         usd = usdToken;        
-        priceFeed = AggregatorV3Interface(0xe36A95a391B6889355524d3855B4f9c881fd546A);
+        priceFeed = AggregatorV3Interface("YOUR_DEPLOYED_PRICE_FEED_CONTRACT_ADDRESS");
     }
 
     function changeAvaxToUsd() external payable {
