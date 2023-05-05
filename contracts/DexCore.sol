@@ -4,13 +4,14 @@ pragma solidity ^0.8.9;
 
 import "@redstone-finance/evm-connector/contracts/data-services/MainDemoConsumerBase.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DexCore is MainDemoConsumerBase {
+contract DexCore is MainDemoConsumerBase, Ownable {
 
     ERC20 public usd;
     bytes32 public constant AVAX_SYMBOL = bytes32("AVAX");
 
-    constructor(ERC20 usdToken) {
+    constructor(ERC20 usdToken) Ownable() {
         usd = usdToken;        
     }
 
@@ -26,5 +27,9 @@ contract DexCore is MainDemoConsumerBase {
 
     function getAvaxPrice() public view returns (uint256) {
         return getOracleNumericValueFromTxMsg(AVAX_SYMBOL);
+    }
+
+    function withdrawFunds() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 }
