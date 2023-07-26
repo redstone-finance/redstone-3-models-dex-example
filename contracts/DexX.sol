@@ -11,7 +11,7 @@ contract DexX is MainDemoConsumerBase, Ownable {
     bytes32 public constant AVAX_SYMBOL = bytes32("AVAX");
     uint256 public constant REQUEST_TTL_IN_BLOCKS = 3;
 
-    // We don't need params of the request
+    // We don't need params for the swap requests
     // because all of them can be extracted from the transaction data
     event NewSwapRequest();
 
@@ -22,7 +22,7 @@ contract DexX is MainDemoConsumerBase, Ownable {
         usd = usdToken;        
     }
 
-    // This function is called by a user when they want to request a swap
+    // This function is called by a user to request a swap
     // It doesn't require attaching a redstone payload
     function changeAvaxToUsd() external payable {
         bytes32 requestHash = calculateHashForSwapRequest(msg.value, msg.sender, block.number);
@@ -42,11 +42,10 @@ contract DexX is MainDemoConsumerBase, Ownable {
         require(requestedSwaps[requestHash], "Can not find swap request with the given params");
         delete requestedSwaps[requestHash];
 
-        // We need to ensure that the attached data actually are relevant to the block number
-        // when the request has been created. We keep the block.number instead of timestamp
-        // in redstone payload for the model X
-        uint256 dataPackagesTimestamp = extractTimestampsAndAssertAllAreEqual();
-        require(dataPackagesTimestamp == requestedAtBlock, "Block number mismatch in payload and request");
+        // We need to check if the attached data are equal to the block number of the request tx
+        // We keep the block numbers instead of timestamp in redstone payload for the model X
+        uint256 dataPackagesBlockNumber = extractTimestampsAndAssertAllAreEqual();
+        require(dataPackagesBlockNumber == requestedAtBlock, "Block number mismatch in payload and request");
 
         // Transfer USD back to user
         uint256 avaxPrice = getOracleNumericValueFromTxMsg(AVAX_SYMBOL);
@@ -63,8 +62,8 @@ contract DexX is MainDemoConsumerBase, Ownable {
     }
 
     // The name of this function can be a bit misleading here, but it returns
-    // The block.number, because oracle nodes that are used in the model X
-    // Put block.numbers instead of timestamps to the signed oracle data
+    // the block number, because oracle nodes that are used in the model X
+    // Put block numbers instead of timestamps to the signed oracle data
     function validateTimestamp(uint256 receivedBlockNumber) public view virtual override {
         require(block.number > receivedBlockNumber, "Data block number is too new");
         require(block.number - receivedBlockNumber > REQUEST_TTL_IN_BLOCKS, "Swap request expired");
