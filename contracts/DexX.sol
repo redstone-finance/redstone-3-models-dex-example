@@ -1,4 +1,4 @@
-// contracts/GLDToken.sol
+// contracts/DexX.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
@@ -31,7 +31,7 @@ contract DexX is MainDemoConsumerBase, Ownable {
         emit NewOracleDataRequest(msg.value, msg.sender, block.number);
     }
 
-    // This function is called by a kepper and triggered by the NewOracleDataRequest event
+    // This function is called by a keeper and triggered by the NewOracleDataRequest event
     // It requires attaching a specific redstone payload
     function executeWithOracleData(
         uint256 avaxToSwap,
@@ -43,12 +43,12 @@ contract DexX is MainDemoConsumerBase, Ownable {
         require(requestedSwaps[requestHash], "Can not find swap request with the given params");
         delete requestedSwaps[requestHash];
 
-        // We need to check if the attached data are equal to the block number of the request tx
-        // We keep the block numbers instead of timestamp in redstone payload for the model X
+        // We need to check if the block number of the attached data is equal to the block number of
+        // the request tx. We use block numbers instead of timestamp in redstone payload for the model X
         uint256 dataPackagesBlockNumber = extractTimestampsAndAssertAllAreEqual();
         require(dataPackagesBlockNumber == requestedAtBlock, "Block number mismatch in payload and request");
 
-        // Transfer USD back to user
+        // Transfer USD to the swap requester
         uint256 usdAmount = getExpectedUsdAmount(avaxToSwap);
         usd.transfer(requestedBy, usdAmount);
     }
@@ -61,12 +61,11 @@ contract DexX is MainDemoConsumerBase, Ownable {
         return keccak256(abi.encodePacked(avaxToSwap, requestedBy, requestedAtBlock));
     }
 
-    // The name of this function can be a bit misleading here, but it returns
-    // the block number, because oracle nodes that are used in the model X
-    // Put block numbers instead of timestamps to the signed oracle data
+    // Despite the name, this function returns the block number from
+    // the attached redstone payload in the model X
     function validateTimestamp(uint256 _receivedBlockNumber) public view virtual override {
-        // We disable block number validation in this function, because we already
-        // validate the received block number in the `executeWithOracleData` function
+        // It's empty, because we disable block number validation in this function, since
+        // we already validate the oracle data block number in the `executeWithOracleData` function
     }
 
     // This function requires an attached redstone payload
