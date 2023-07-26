@@ -12,8 +12,9 @@ contract DexClassic is Ownable {
     AggregatorV3Interface public priceFeed; 
 
     constructor(ERC20 usdToken) Ownable() {
-        usd = usdToken;        
-        priceFeed = AggregatorV3Interface("YOUR_DEPLOYED_PRICE_FEED_CONTRACT_ADDRESS");        
+        // You should replace address(0) with your deployed PriceFeed address
+        priceFeed = AggregatorV3Interface(address(0));
+        usd = usdToken;
     }
 
     function changeAvaxToUsd() external payable {
