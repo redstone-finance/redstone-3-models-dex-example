@@ -9,11 +9,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract DexX is MainDemoConsumerBase, Ownable {
 
     bytes32 public constant AVAX_SYMBOL = bytes32("AVAX");
-    uint256 public constant REQUEST_TTL_IN_BLOCKS = 3;
 
-    // We don't need params for the swap requests
-    // because all of them can be extracted from the transaction data
-    event NewSwapRequest();
+    event NewDataRequest(
+        uint256 indexed avaxToSwap,
+        address indexed requestedBy,
+        uint256 indexed requestedAtBlock
+    );
 
     ERC20 public usd;
     mapping (bytes32 => bool) requestedSwaps;
@@ -27,12 +28,12 @@ contract DexX is MainDemoConsumerBase, Ownable {
     function changeAvaxToUsd() external payable {
         bytes32 requestHash = calculateHashForSwapRequest(msg.value, msg.sender, block.number);
         requestedSwaps[requestHash] = true;
-        emit NewSwapRequest();
+        emit NewSwapRequest(msg.value, msg.sender, block.number);
     }
 
     // This function is called by a kepper and triggered by the NewSwapRequest event
     // It requires attaching a specific redstone payload
-    function executeSwap(
+    function executeWithData(
         uint256 avaxToSwap,
         address requestedBy,
         uint256 requestedAtBlock
@@ -48,9 +49,8 @@ contract DexX is MainDemoConsumerBase, Ownable {
         require(dataPackagesBlockNumber == requestedAtBlock, "Block number mismatch in payload and request");
 
         // Transfer USD back to user
-        uint256 avaxPrice = getOracleNumericValueFromTxMsg(AVAX_SYMBOL);
-        uint256 usdAmount = avaxToSwap * avaxPrice / 10**8;
-        usd.transfer(msg.sender, usdAmount);
+        uint256 usdAmount = getExpectedUsdAmount(avaxToSwap);
+        usd.transfer(requestedBy, usdAmount);
     }
 
     function calculateHashForSwapRequest(
@@ -64,17 +64,27 @@ contract DexX is MainDemoConsumerBase, Ownable {
     // The name of this function can be a bit misleading here, but it returns
     // the block number, because oracle nodes that are used in the model X
     // Put block numbers instead of timestamps to the signed oracle data
-    function validateTimestamp(uint256 receivedBlockNumber) public view virtual override {
-        require(block.number > receivedBlockNumber, "Data block number is too new");
-        require(block.number - receivedBlockNumber > REQUEST_TTL_IN_BLOCKS, "Swap request expired");
+    function validateTimestamp(uint256 _receivedBlockNumber) public view virtual override {
+        // We disable block number validation in this function, because we already
+        // validate the received block number in the `executeWithData` function
+    }
+
+    // This function requires an attached redstone payload
+    // It is used by keepers, but can also be used by DEX users
+    // to estimate an approximate USD amount they can receive for the given avax amount
+    function getExpectedUsdAmount(uint256 avaxToSwap) public view returns (uint256) {
+        uint256 avaxPrice = getAvaxPrice();
+        return avaxToSwap * avaxPrice / 10**8;
+    }
+
+    // This function requires an attached redstone payload
+    // It is used by keepers, but can also be used by DEX users
+    // to estimate an approximate price of AVAX for their trades
+    function getAvaxPrice() public view returns (uint256) {
+        return getOracleNumericValueFromTxMsg(AVAX_SYMBOL);
     }
 
     function withdrawFunds() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
-
-    // The functions below can not be implemented in the model X
-    // Because the user doesn't know the price price before requesting the swap
-    // function getExpectedUsdAmount(uint256 avaxToSwap) public view returns (uint256) {}
-    // function getAvaxPrice() public view returns (uint256) {}
 }
