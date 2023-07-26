@@ -10,7 +10,7 @@ contract DexX is MainDemoConsumerBase, Ownable {
 
     bytes32 public constant AVAX_SYMBOL = bytes32("AVAX");
 
-    event NewDataRequest(
+    event NewOracleDataRequest(
         uint256 indexed avaxToSwap,
         address indexed requestedBy,
         uint256 indexed requestedAtBlock
@@ -28,12 +28,12 @@ contract DexX is MainDemoConsumerBase, Ownable {
     function changeAvaxToUsd() external payable {
         bytes32 requestHash = calculateHashForSwapRequest(msg.value, msg.sender, block.number);
         requestedSwaps[requestHash] = true;
-        emit NewSwapRequest(msg.value, msg.sender, block.number);
+        emit NewOracleDataRequest(msg.value, msg.sender, block.number);
     }
 
-    // This function is called by a kepper and triggered by the NewSwapRequest event
+    // This function is called by a kepper and triggered by the NewOracleDataRequest event
     // It requires attaching a specific redstone payload
-    function executeWithData(
+    function executeWithOracleData(
         uint256 avaxToSwap,
         address requestedBy,
         uint256 requestedAtBlock
@@ -66,7 +66,7 @@ contract DexX is MainDemoConsumerBase, Ownable {
     // Put block numbers instead of timestamps to the signed oracle data
     function validateTimestamp(uint256 _receivedBlockNumber) public view virtual override {
         // We disable block number validation in this function, because we already
-        // validate the received block number in the `executeWithData` function
+        // validate the received block number in the `executeWithOracleData` function
     }
 
     // This function requires an attached redstone payload
