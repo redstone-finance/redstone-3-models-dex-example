@@ -27,6 +27,7 @@ contract DexX is MainDemoConsumerBase, Ownable {
     // It doesn't require attaching a redstone payload
     function changeAvaxToUsd() external payable {
         bytes32 requestHash = calculateHashForSwapRequest(msg.value, msg.sender, block.number);
+        require(!requestedSwaps[requestHash], "Request with the same params already exists");
         requestedSwaps[requestHash] = true;
         emit NewOracleDataRequest(msg.value, msg.sender, block.number);
     }
