@@ -13,11 +13,12 @@ const config: HardhatUserConfig = {
     },
   },
 
-    networks: {
-        red: {
-          url: `YOUR_SUBNET_RPC`,
-          accounts: ["YOUR_SUBNET_PRIV_KEY"]
-        }
-      }
+  networks: {
+    red: {
+      url: `YOUR_SUBNET_RPC`,
+      accounts: ["YOUR_SUBNET_PRIV_KEY"]
+    }
+  }
 };
+
 export default config;
