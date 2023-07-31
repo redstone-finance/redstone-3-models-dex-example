@@ -7,6 +7,7 @@ It's based on a very simple exchange contract that allows user to swap their AVA
 It compares two models of integration: 
 1. [Core](/contracts/DexCore.sol) - where price data is injected to transactions executed by users ([learn more](https://docs.redstone.finance/docs/smart-contract-devs/get-started/redstone-core))
 2. [Classic](/contracts/DexClassic.sol) - where price data is periodically pushed into on-chain storage ([learn more](https://docs.redstone.finance/docs/smart-contract-devs/get-started/redstone-classic))
+3. [X](/contracts/DexX.sol) - where price data is updated by keepers to prevent front-running ([learn more](https://docs.redstone.finance/docs/smart-contract-devs/get-started/redstone-x))
 
 ## Step by step guide
 
